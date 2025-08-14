@@ -12,12 +12,15 @@ class Watchy7SEG : public Watchy{
     using Watchy::Watchy;
     public:
         void drawWatchFace();
+        void updateDarkmode();
         void drawTime();
         void drawDate();
         void drawSteps();
         //Used to update the gmt offset
         void updateWeather();
         void drawBattery();
+    private:
+    bool darkmode = false;
 };
 
 #endif

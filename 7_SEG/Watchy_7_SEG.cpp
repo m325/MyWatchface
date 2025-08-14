@@ -1,6 +1,9 @@
 #include "Watchy_7_SEG.h"
 
-#define DARKMODE true
+//TODO Somewhere in settings?
+//Time settings
+#define NIGHT_START 22 //switch from Dark Mode to Light Mode when the hour is 22
+#define NIGHT_END 6 //switch from Light Mode to Dark Mode when the hour is 6
 
 const uint8_t BATTERY_SEGMENT_WIDTH = 7;
 const uint8_t BATTERY_SEGMENT_HEIGHT = 11;
@@ -9,21 +12,34 @@ const uint8_t WEATHER_ICON_WIDTH = 48;
 const uint8_t WEATHER_ICON_HEIGHT = 32;
 
 void Watchy7SEG::drawWatchFace(){
-    display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
-    display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    updateDarkmode();
+    display.fillScreen(darkmode ? GxEPD_BLACK : GxEPD_WHITE);
+    display.setTextColor(darkmode ? GxEPD_WHITE : GxEPD_BLACK);
     drawTime();
     drawDate();
     updateWeather();
     drawBattery();
-    display.drawBitmap(116, 75, WIFI_CONFIGURED ? wifi : wifioff, 26, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    display.drawBitmap(116, 75, WIFI_CONFIGURED ? wifi : wifioff, 26, 18, darkmode ? GxEPD_WHITE : GxEPD_BLACK);
     if(BLE_CONFIGURED){
-        display.drawBitmap(100, 73, bluetooth, 13, 21, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+        display.drawBitmap(100, 73, bluetooth, 13, 21, darkmode ? GxEPD_WHITE : GxEPD_BLACK);
     }
     #ifdef ARDUINO_ESP32S3_DEV
     if(USB_PLUGGED_IN){
-      display.drawBitmap(140, 75, charge, 16, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+      display.drawBitmap(140, 75, charge, 16, 18, darkmode ? GxEPD_WHITE : GxEPD_BLACK);
     }
     #endif
+}
+
+void Watchy7SEG::updateDarkmode(){
+    //TODO: Adapt timeframe based on settings
+    if(currentTime.Hour <= NIGHT_START && currentTime.Hour >= NIGHT_END)
+    {
+      darkmode = true;
+    }
+    else
+    {
+      darkmode = false;
+    }
 }
 
 void Watchy7SEG::drawTime(){
@@ -80,13 +96,13 @@ void Watchy7SEG::drawSteps(){
       sensor.resetStepCounter();
     }
     uint32_t stepCount = sensor.getCounter();
-    display.drawBitmap(10, 165, steps, 19, 23, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    display.drawBitmap(10, 165, steps, 19, 23, darkmode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(35, 190);
     display.println(stepCount);
 }
 void Watchy7SEG::drawBattery(){
-    display.drawBitmap(158, 73, battery, 37, 21, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
-    display.fillRect(163, 78, 27, BATTERY_SEGMENT_HEIGHT, DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);//clear battery segments
+    display.drawBitmap(158, 73, battery, 37, 21, darkmode ? GxEPD_WHITE : GxEPD_BLACK);
+    display.fillRect(163, 78, 27, BATTERY_SEGMENT_HEIGHT, darkmode ? GxEPD_BLACK : GxEPD_WHITE);//clear battery segments
     int8_t batteryLevel = 0;
     float VBAT = getBatteryVoltage();
     if(VBAT > 4.0){
@@ -103,7 +119,7 @@ void Watchy7SEG::drawBattery(){
     }
 
     for(int8_t batterySegments = 0; batterySegments < batteryLevel; batterySegments++){
-        display.fillRect(163 + (batterySegments * BATTERY_SEGMENT_SPACING), 78, BATTERY_SEGMENT_WIDTH, BATTERY_SEGMENT_HEIGHT, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+        display.fillRect(163 + (batterySegments * BATTERY_SEGMENT_SPACING), 78, BATTERY_SEGMENT_WIDTH, BATTERY_SEGMENT_HEIGHT, darkmode ? GxEPD_WHITE : GxEPD_BLACK);
     }
 }
 
