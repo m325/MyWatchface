@@ -15,7 +15,8 @@ class Watchy7SEG : public Watchy{
         void drawTime();
         void drawDate();
         void drawSteps();
-        void drawWeather();
+        //Used to update the gmt offset
+        void updateWeather();
         void drawBattery();
 };
 
