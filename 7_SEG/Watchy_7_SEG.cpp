@@ -32,7 +32,7 @@ void Watchy7SEG::drawWatchFace(){
 
 void Watchy7SEG::updateDarkmode(){
     //TODO: Adapt timeframe based on settings
-    if(currentTime.Hour <= NIGHT_START && currentTime.Hour >= NIGHT_END)
+    if(currentTime.Hour < NIGHT_START && currentTime.Hour >= NIGHT_END)
     {
       darkmode = true;
     }
